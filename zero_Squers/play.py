@@ -1,14 +1,13 @@
 import matplotlib.pyplot as plt
 from state import State
-
-class Play:
+class Play:#كلاس اللعب
     def __init__(self, state_ins):
         self.state_ins = state_ins
         self.fig, self.ax = plt.subplots(5, 1, figsize=(2, 20))#جزئت الواجهة لارع محاور ليمثل الحالة الحلية يلي عم بلعب فيها و الاربع حالات المتوقعة
         self.fig.canvas.mpl_connect('key_press_event', self.press)#ربطت حدث الضغط على ازرار الحركة
         self.state_ins.print(self.state_ins.mattrix, self.ax[0])
         self.pre_mattrix = None  
-        self.last_dir = None 
+        self.last_dir =   None 
 
     def press(self, event):
         if event.key == 'up':

@@ -1,7 +1,7 @@
 import copy
 import matplotlib.pyplot as plt
 
-class State:
+class State:#كلاس المنطق
     # last_saved_state = None
     def __init__(self, mattrix):
         if mattrix is None:
