@@ -40,24 +40,25 @@ def run_game(level_name, mattrix):
     print(f"Running level: {level_name}")
     state_ins = State(mattrix)
     play_instance = Play(state_ins)
-    plt.ion() 
-    print("\nRunning BFS...")
-    bfs_path = play_instance.bfs()
-    if bfs_path:
-        print("BFS Solution Path:", bfs_path)
-        for move in bfs_path:
-            play_instance.h_move(move)
-            plt.pause(1.5) 
-
-    # time.sleep(2)
     
-    # print("\nRunning DFS...")
-    # dfs_path = play_instance.dfs()
-    # if dfs_path:
-    #     print("DFS Solution Path:", dfs_path)
-    #     for move in dfs_path:
+    
+    plt.ion() #لتشغيل ال DFS لازم بدل بالكومنتات
+    # print("\nRunning BFS...")
+    # bfs_path = play_instance.bfs()
+    # if bfs_path:
+    #     print("BFS Solution Path:", bfs_path)
+    #     for move in bfs_path:
     #         play_instance.h_move(move)
     #         plt.pause(1.5) 
+
+    # time.sleep(2)
+    print("\nRunning DFS...")
+    dfs_path = play_instance.dfs()
+    if dfs_path:
+        print("DFS Solution Path:", dfs_path)
+        for move in dfs_path:
+            play_instance.h_move(move)
+            plt.pause(1.5) 
 
     plt.ioff()  
     plt.close()

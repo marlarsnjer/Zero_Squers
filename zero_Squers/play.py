@@ -87,28 +87,28 @@ class Play:
     #لحتى شغل ال DFS ببدل بالكومنتات
     def Bfs_Dfs_gor(self):
     # BFS
-        bfs_path = self.bfs()
-        if bfs_path:
-            print("Playing BFS path...")
-            for move in bfs_path:
-                self.h_move(move)
-                plt.pause(1.5)
-            
-        plt.pause(1) 
-    
-    # DFS
-        # dfs_path = self.dfs()
-        # if dfs_path:
-        #     print("Playing DFS path...")
-        #     for move in dfs_path:
+        # bfs_path = self.bfs()
+        # if bfs_path:
+        #     print("Playing BFS path...")
+        #     for move in bfs_path:
         #         self.h_move(move)
         #         plt.pause(1.5)
-        #     dfs_path = self.dfs()
-        #     if dfs_path:
-        #         print("Playing DFS path...")
-        #         for move in dfs_path:
-        #             self.h_move(move, is_bfs=False) 
-        #             plt.pause(1.5)
+            
+        # plt.pause(1) 
+    
+    # DFS
+        dfs_path = self.dfs()
+        if dfs_path:
+            print("Playing DFS path...")
+            for move in dfs_path:
+                self.h_move(move)
+                plt.pause(1.5)
+            dfs_path = self.dfs()
+            if dfs_path:
+                print("Playing DFS path...")
+                for move in dfs_path:
+                    self.h_move(move, is_bfs=False) 
+                    plt.pause(1.5)
 
 def equalll(mattrix1, mattrix2):
     return mattrix1 == mattrix2
