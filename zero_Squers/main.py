@@ -40,9 +40,7 @@ def run_game(level_name, mattrix):
     print(f"Running level: {level_name}")
     state_ins = State(mattrix)
     play_instance = Play(state_ins)
-    
-    
-    plt.ion() #لتشغيل ال DFS لازم بدل بالكومنتات
+    plt.ion() 
     print("\nRunning BFS...")
     bfs_path = play_instance.bfs()
     if bfs_path:
