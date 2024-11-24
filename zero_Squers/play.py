@@ -1,11 +1,13 @@
 import time
 import matplotlib.pyplot as plt
 from collections import deque
+from state import State
 import copy
+import heapq
 class Play:
     def __init__(self, state_ins):
         self.state_ins = state_ins
-        self.fig, self.ax = plt.subplots(1, 1, figsize=(19, 15))
+        self.fig, self.ax = plt.subplots(1, 1, figsize=(10, 6))
         self.state_ins.print(self.state_ins.mattrix, self.ax)
         self.ax.set_title("BFS Search")
         plt.tight_layout() 
@@ -83,6 +85,40 @@ class Play:
 
         print("No Path found by DFS.")
         return None
+    
+
+    def ucs(self):
+        initial_state = self.state_ins
+        pq = []  
+        heapq.heappush(pq, (0, str(initial_state.mattrix), []))  
+        visited_states = set() 
+
+        while pq:
+            current_cost, state_key, current_path = heapq.heappop(pq)
+
+            if state_key in visited_states:
+                continue
+
+            visited_states.add(state_key)
+            current_state = State.from_key(state_key)
+
+            if current_state.check_win(current_state.mattrix):
+                print("Path found by UCS:", current_path)
+                return current_path
+
+            for direction in ['up', 'down', 'left', 'right']:
+                next_state = current_state.move1(current_state, direction)
+                next_state_key = str(next_state.mattrix)
+                movement_cost = 1 
+                new_cost = current_cost + movement_cost
+
+                if next_state_key not in visited_states:
+                    heapq.heappush(pq, (new_cost, next_state_key, current_path + [direction]))
+
+        print("No Path found by UCS.")
+        return None
+
+
 
     #لحتى شغل ال DFS ببدل بالكومنتات
     def Bfs_Dfs_gor(self):
@@ -97,18 +133,30 @@ class Play:
         # plt.pause(1) 
     
     # DFS
-        dfs_path = self.dfs()
-        if dfs_path:
-            print("Playing DFS path...")
-            for move in dfs_path:
-                self.h_move(move)
-                plt.pause(1.5)
-            dfs_path = self.dfs()
-            if dfs_path:
-                print("Playing DFS path...")
-                for move in dfs_path:
-                    self.h_move(move, is_bfs=False) 
+        # dfs_path = self.dfs()
+        # if dfs_path:
+        #     print("Playing DFS path...")
+        #     for move in dfs_path:
+        #         self.h_move(move)
+        #         plt.pause(1.5)
+        #     dfs_path = self.dfs()
+        #     if dfs_path:
+        #         print("Playing DFS path...")
+        #         for move in dfs_path:
+        #             self.h_move(move, is_bfs=False) 
+        #             plt.pause(1.5)
+    #UCS
+        ucs_path = self.ucs()
+        if ucs_path:
+                print("Playing UCS path...")
+                for move in ucs_path:
+                    self.h_move(move)
                     plt.pause(1.5)
+
+        plt.pause(1)
+
+
+    
 
 def equalll(mattrix1, mattrix2):
     return mattrix1 == mattrix2

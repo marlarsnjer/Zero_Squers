@@ -52,11 +52,18 @@ def run_game(level_name, mattrix):
     #         plt.pause(1.5) 
 
     # time.sleep(2)
-    print("\nRunning DFS...")
-    dfs_path = play_instance.dfs()
-    if dfs_path:
-        print("DFS Solution Path:", dfs_path)
-        for move in dfs_path:
+    # print("\nRunning DFS...")
+    # dfs_path = play_instance.dfs()
+    # if dfs_path:
+    #     print("DFS Solution Path:", dfs_path)
+    #     for move in dfs_path:
+    #         play_instance.h_move(move)
+    #         plt.pause(1.5) 
+    print("\nRunning UCS...")
+    ucs_path = play_instance.ucs()
+    if ucs_path:
+        print("DFS Solution Path:", ucs_path)
+        for move in ucs_path:
             play_instance.h_move(move)
             plt.pause(1.5) 
 

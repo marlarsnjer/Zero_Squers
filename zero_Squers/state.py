@@ -1,15 +1,17 @@
 import copy
 import matplotlib.pyplot as plt
+from collections import deque
+import heapq
+import time
 
-class State:#كلاس المنطق
-    # last_saved_state = None
+class State:
     def __init__(self, mattrix):
         if mattrix is None:
             print("The matrix cannot be None")
         self.mattrix = mattrix
         self.goal_cells = [['red' if cell == 'M' else 'aqua' if cell == 'A' else 'orange' if cell == 'L' else None for cell in row] for row in mattrix]
 
-    def print(self, mattrix, ax):#لطباعة الرقعة مع الالوان
+    def print(self, mattrix, ax):
         rows_len = len(mattrix)
         colums_len = len(mattrix[0])
         ax.clear()
@@ -39,8 +41,8 @@ class State:#كلاس المنطق
         ax.set_ylim([0, rows_len])
         plt.draw()
 
-    def move1(self, state_obj, dir):#بمرر المصفوفة على شكل اوبجيكت 
-        mattrix_copy = copy.deepcopy(state_obj.mattrix)# عملت نسخة من المصفوفة الاصلية بال deepcopy لحتى لما عدل ما تتأثر المصفوفة الاصلية 
+    def move1(self, state_obj, dir):
+        mattrix_copy = copy.deepcopy(state_obj.mattrix)
         positions = self.get_loc(mattrix_copy)
         for (i, j) in positions:
             new_i, new_j = self.move2(mattrix_copy, i, j, dir)
@@ -49,9 +51,8 @@ class State:#كلاس المنطق
         
         return State(mattrix_copy)
 
-
-    def get_loc(self, mattrix):#ليرجعلي احداثيات المربعات الملونة 
-            return [(i, j) for i in range(len(mattrix)) for j in range(len(mattrix[0])) if mattrix[i][j] in ['R', 'B', 'O']]
+    def get_loc(self, mattrix):
+        return [(i, j) for i in range(len(mattrix)) for j in range(len(mattrix[0])) if mattrix[i][j] in ['R', 'B', 'O']]
 
     def move2(self, mattrix, i, j, dir):
         new_i, new_j = i, j
@@ -71,12 +72,12 @@ class State:#كلاس المنطق
             i -= 1
         return i, j
 
-    def update_mattrix(self, mattrix, old_i, old_j, new_i, new_j):#ليحدث المصفوفة بعد الحركة 
+    def update_mattrix(self, mattrix, old_i, old_j, new_i, new_j):
         if (new_i, new_j) != (old_i, old_j):
             mattrix[new_i][new_j] = mattrix[old_i][old_j]
             mattrix[old_i][old_j] = 0
 
-    def able_to_move(self, mattrix, i, j, dir):# بيتأكد انو مافي شي بعيق الحركة بهاد الاتجاه
+    def able_to_move(self, mattrix, i, j, dir):
         if (self.move_to_right(mattrix, i, j, dir) or
             self.move_to_left(mattrix, i, j, dir) or
             self.move_to_up(mattrix, i, j, dir) or
@@ -86,7 +87,7 @@ class State:#كلاس المنطق
 
     def move_to_right(self, mattrix, i, j, dir):
         if dir == 'right':
-            if j + 1 < len(mattrix[0]) and mattrix[i][j + 1] not in [1, 'R', 'B', 'O']:# jبتمشي عالاعمدة
+            if j + 1 < len(mattrix[0]) and mattrix[i][j + 1] not in [1, 'R', 'B', 'O']:
                 return True
         return False
 
@@ -98,7 +99,7 @@ class State:#كلاس المنطق
 
     def move_to_up(self, mattrix, i, j, dir):
         if dir == 'up':
-            if i + 1 < len(mattrix) and mattrix[i + 1][j] not in [1, 'R', 'B', 'O']:#ه بتمشي عالسطور
+            if i + 1 < len(mattrix) and mattrix[i + 1][j] not in [1, 'R', 'B', 'O']:
                 return True
         return False
 
@@ -108,7 +109,7 @@ class State:#كلاس المنطق
                 return True
         return False
 
-    def check(self, mattrix, i, j, new_j, new_i):#هدف للابيض بيتأكد من انو المربع الملون وصل للهدف الصح و بغير لون البوردر لل
+    def check(self, mattrix, i, j, new_j, new_i):
         goals = {
             'R': 'M',
             'B': 'A',
@@ -125,7 +126,7 @@ class State:#كلاس المنطق
         if self.check_win(mattrix):
             print("You Win :)")
 
-    def change_color(self, mattrix, i, j):#بعد ما يوصل للهدف بيقلب لونو لابيض
+    def change_color(self, mattrix, i, j):
         if mattrix[i][j] in ['R', 'B', 'O']:
             mattrix[i][j] = 'white'
 
@@ -141,3 +142,38 @@ class State:#كلاس المنطق
                 if cell in goals_reached and mattrix[i][j] != 'white':
                     return False
         return True
+
+    @staticmethod
+    def from_key(state_key):
+        mattrix = eval(state_key)
+        return State(mattrix)
+
+
+class Play:
+    def __init__(self, state_ins):
+        self.state_ins = state_ins
+        self.fig, self.ax = plt.subplots(1, 1, figsize=(10, 6))
+        self.state_ins.print(self.state_ins.mattrix, self.ax)
+        self.ax.set_title("BFS Search")
+        plt.tight_layout()
+
+    def press(self, event):
+        self.next_state()
+
+    def next_state(self):
+        directions = ['right', 'left', 'up', 'down']
+        s_obj = []
+        for direction in directions:
+            n_state = self.state_ins.move1(self.state_ins, direction)
+            s_obj.append(n_state)
+            n_state.print(n_state.mattrix, self.ax)
+        plt.draw()
+
+    def h_move(self, dir, is_bfs=True):
+        self.pre_mattrix = [row[:] for row in self.state_ins.mattrix]
+        n_state_ins = self.state_ins.move1(self.state_ins, dir)
+        self.state_ins = n_state_ins
+        if is_bfs:
+            self.state_ins.print(self.state_ins.mattrix, self.ax)
+        plt.draw()
+
