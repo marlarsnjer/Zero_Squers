@@ -57,34 +57,58 @@ class Play:
         print("No Path found by BFS.")
         return None
 
-    def dfs(self):
-        initial_state = self.state_ins
-        stack = [(initial_state, [])]
-        visited_states = set()
+    # def dfs(self):
+    #     initial_state = self.state_ins
+    #     stack = [(initial_state, [])]
+    #     visited_states = set()
 
-        while stack:
-            current_state, current_path = stack.pop() 
-            state_key = str(current_state.mattrix)
+    #     while stack:
+    #         current_state, current_path = stack.pop() 
+    #         state_key = str(current_state.mattrix)
             
-            if state_key in visited_states:
-                continue
+    #         if state_key in visited_states:
+    #             continue
             
-            visited_states.add(state_key)
+    #         visited_states.add(state_key)
             
-            if current_state.check_win(current_state.mattrix):
-                print("Path found by DFS:", current_path)
-                return current_path
+    #         if current_state.check_win(current_state.mattrix):
+    #             print("Path found by DFS:", current_path)
+    #             return current_path
             
-            for direction in ['up', 'down', 'left', 'right']:
-                next_state = current_state.move1(current_state, direction)
-                next_state_key = str(next_state.mattrix)
+    #         for direction in ['up', 'down', 'left', 'right']:
+    #             next_state = current_state.move1(current_state, direction)
+    #             next_state_key = str(next_state.mattrix)
                 
-                if next_state_key not in visited_states:
-                    stack.append((next_state, current_path + [direction]))
-                    plt.draw()
+    #             if next_state_key not in visited_states:
+    #                 stack.append((next_state, current_path + [direction]))
+    #                 plt.draw()
 
-        print("No Path found by DFS.")
-        return None
+    #     print("No Path found by DFS.")
+    #     return None
+
+    def recursive_dfs(self, current_state=None, current_path=None, visited_states=None):
+        if current_state is None:
+            current_state = self.state_ins
+            current_path = []
+            visited_states = set()
+
+        state_key = str(current_state.mattrix)
+        if state_key in visited_states:
+            return None
+        visited_states.add(state_key)
+        if current_state.check_win(current_state.mattrix):
+            print("Path found by Recursive DFS:", current_path)
+            return current_path
+        
+        for direction in ['up', 'down', 'left', 'right']:
+            next_state = current_state.move1(current_state, direction)
+            next_state_key = str(next_state.mattrix)
+            if next_state_key not in visited_states:
+                result = self.recursive_dfs(next_state, current_path + [direction], visited_states)
+                if result: 
+                    return result
+                return None
+
     
 
     def ucs(self):
@@ -95,7 +119,6 @@ class Play:
 
         while pq:
             current_cost, state_key, current_path = heapq.heappop(pq)
-
             if state_key in visited_states:
                 continue
 
@@ -146,10 +169,19 @@ class Play:
         #             self.h_move(move, is_bfs=False) 
         #             plt.pause(1.5)
     #UCS
-        ucs_path = self.ucs()
-        if ucs_path:
-                print("Playing UCS path...")
-                for move in ucs_path:
+        # ucs_path = self.ucs()
+        # if ucs_path:
+        #         print("Playing UCS path...")
+        #         for move in ucs_path:
+        #             self.h_move(move)
+        #             plt.pause(1.5)
+
+        # plt.pause(1)
+
+        recursive_dfs_path = self.recursive_dfs()
+        if recursive_dfs_path:
+                print("Playing recursive dfs path...")
+                for move in recursive_dfs_path:
                     self.h_move(move)
                     plt.pause(1.5)
 

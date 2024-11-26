@@ -43,6 +43,14 @@ def run_game(level_name, mattrix):
     
     
     plt.ion() #لتشغيل ال DFS لازم بدل بالكومنتات
+
+    print("\nRunning recursive dfs...")
+    recursive_dfs_path = play_instance.recursive_dfs()
+    if recursive_dfs_path:
+        print("recursive dfs path Solution Path:", recursive_dfs_path)
+        for move in recursive_dfs_path:
+            play_instance.h_move(move)
+            plt.pause(1.5) 
     # print("\nRunning BFS...")
     # bfs_path = play_instance.bfs()
     # if bfs_path:
@@ -59,13 +67,14 @@ def run_game(level_name, mattrix):
     #     for move in dfs_path:
     #         play_instance.h_move(move)
     #         plt.pause(1.5) 
-    print("\nRunning UCS...")
-    ucs_path = play_instance.ucs()
-    if ucs_path:
-        print("DFS Solution Path:", ucs_path)
-        for move in ucs_path:
-            play_instance.h_move(move)
-            plt.pause(1.5) 
+    # print("\nRunning UCS...")
+    # ucs_path = play_instance.ucs()
+    # if ucs_path:
+    #     print("UCS Solution Path:", ucs_path)
+    #     for move in ucs_path:
+    #         play_instance.h_move(move)
+    #         plt.pause(1.5) 
+    
 
     plt.ioff()  
     plt.close()
