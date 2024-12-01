@@ -160,37 +160,81 @@ class Play:
 
 
 
+    
     def astar(self):
         initial_state = self.state_ins
-        pq = PriorityQueue()  
-        pq.put((0, str(initial_state.mattrix), [])) 
         visited_states = set() 
         visited_counter=0
+        pq = PriorityQueue()
+        pq.put((0, id(initial_state), initial_state, []))
+        visited = set()
         while not pq.empty():
-            current_cost, state_key, current_path = pq.get()
-            if state_key in visited_states:
+            cost, _, current_state, path = pq.get() 
+            current_key = tuple(map(tuple, current_state.mattrix))
+
+            if current_key in visited:
                 continue
-            visited_states.add(state_key)
+            visited.add(current_key)
             visited_counter+=1
-            current_state = State.from_key(state_key) 
             if current_state.check_win(current_state.mattrix):
-                print("Path found by UCS:", current_path)
-                print("Cost:",new_cost )
+                print("Solution found with A*: Path:", path)
+                print("Cost:",g_cost )
                 print("Visited Counter:",visited_counter )
-                return current_path
+                return path
 
-            for direction in ['up', 'down', 'left', 'right']:
-                next_state = current_state.move1(current_state, direction) 
-                next_state_key = str(next_state.mattrix) 
-                movement_cost = 1
-                new_cost = current_cost + movement_cost
-                h_cost = self.heu1(next_state.mattrix) 
-                f_cost = new_cost + h_cost  
-                if next_state_key not in visited_states: 
-                    pq.put((f_cost, next_state_key, current_path + [direction])) 
+            directions = ['up', 'down', 'left', 'right']
+            for direction in directions:
+                new_state = current_state.move1(current_state, direction)
+                new_key = tuple(map(tuple, new_state.mattrix))
 
-        print("No Path found by UCS.") 
+                if new_key not in visited:
+                    g_cost = len(path) + 1 
+                    h_cost = self.heu1(new_state.mattrix) 
+                    f_cost = g_cost + h_cost  
+                    pq.put((f_cost, id(new_state), new_state, path + [direction])) 
+
+        print("No solution found with A*.")
         return None
+
+    
+    def hill_climbing(self):
+        def get_heuristic(neighbor):
+            return neighbor[0] 
+        current_state = self.state_ins
+        current_heuristic = self.heu1(current_state.mattrix)
+        visited_counter = 0
+        path = []
+    
+        while True:
+            neighbors = []
+            for direction in ['up', 'down', 'left', 'right']:
+                next_state = current_state.move1(current_state, direction)
+                heuristic = self.heu1(next_state.mattrix)
+                neighbors.append((heuristic, next_state, direction))
+            best_heuristic, best_neighbor, best_move = min(neighbors, key=get_heuristic)
+
+            visited_counter += 1
+            print(f"Step {visited_counter}: Best Move: {best_move}, Heuristic: {best_heuristic}")
+
+            if best_heuristic >= current_heuristic:
+                print("Path explored so far:", path)
+                print("Visited Counter:", visited_counter)
+                break
+
+            current_state = best_neighbor
+            current_heuristic = best_heuristic
+            path.append(best_move)
+
+            if current_state.check_win(current_state.mattrix):
+                print("Solution found with Hill Climbing!")
+                print("Path:", path)
+                print("Visited Counter:", visited_counter)
+                return path
+
+        print("No solution found with Hill Climbing.")
+        return None
+
+
 
 
     #لحتى شغل ال DFS ببدل بالكومنتات
@@ -238,13 +282,21 @@ class Play:
         # plt.pause(1)
         
 
-        astar_path = self.astar()
-        if astar_path:
-                print("Playing recursive dfs path...")
-                for move in astar_path:
-                    self.h_move(move)
-                    plt.pause(1.5)
+        # astar_path = self.astar()
+        # if astar_path:
+        #         print("Playing recursive dfs path...")
+        #         for move in astar_path:
+        #             self.h_move(move)
+        #             plt.pause(1.5)
 
+        # plt.pause(1)
+        hill_climbing_path = self.hill_climbing()
+        if hill_climbing_path:
+            print("Playing Hill Climbing path...")
+            for move in hill_climbing_path:
+                self.h_move(move)
+                plt.pause(1.5)
+        
         plt.pause(1)
         
 

@@ -4,13 +4,15 @@ import matplotlib.pyplot as plt
 import time
 def get_levels():
     levels = {
-        "Easy": [
-            [0, 0, 0, 1, 1, 1, 0, 0],
-            [1, 1, 1, 1, 'M', 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 'R', 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1],
+            "Easy": [
+                    [0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 'B', 0, 1, 1, 1, 1, 1, 1, 0],
+                    [1, 0, 0, 0, 1, 1, 'A', 0, 0, 1, 1],
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0, 'M', 1],
+                    [1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1],
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                    [1, 1, 'R', 0, 0, 1, 1, 1, 1, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]
         ],
         "Medium": [
             [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
@@ -75,13 +77,21 @@ def run_game(level_name, mattrix):
     #     for move in ucs_path:
     #         play_instance.h_move(move)
     #         plt.pause(1.5) 
-    print("Running A* Search...")
-    astar_path = play_instance.astar()
-    if astar_path:
+    # print("Running A* Search...")
+    # astar_path = play_instance.astar()
+    # if astar_path:
+    #         print("Playing A* path...")
+    #         for move in astar_path:
+    #             play_instance.h_move(move)
+    #             plt.pause(1.5)
+    print("Running Hill Climbing Search...")
+    hill_climbing_path = play_instance.hill_climbing()
+    if hill_climbing_path:
             print("Playing A* path...")
-            for move in astar_path:
+            for move in hill_climbing_path:
                 play_instance.h_move(move)
                 plt.pause(1.5)
+    
     
     
     plt.ioff()  
