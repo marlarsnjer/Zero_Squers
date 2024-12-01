@@ -43,14 +43,15 @@ def run_game(level_name, mattrix):
     
     
     plt.ion() #لتشغيل ال DFS لازم بدل بالكومنتات
-
-    print("\nRunning recursive dfs...")
-    recursive_dfs_path = play_instance.recursive_dfs()
-    if recursive_dfs_path:
-        print("recursive dfs path Solution Path:", recursive_dfs_path)
-        for move in recursive_dfs_path:
-            play_instance.h_move(move)
-            plt.pause(1.5) 
+    #Recursive_Dfs
+    # print("\nRunning recursive dfs...")
+    # recursive_dfs_path = play_instance.recursive_dfs()
+    # if recursive_dfs_path:
+    #     print("recursive dfs path Solution Path:", recursive_dfs_path)
+    #     for move in recursive_dfs_path:
+    #         play_instance.h_move(move)
+    #         plt.pause(1.5) # لزيادة الزمن بين الحركات
+    #BFS
     # print("\nRunning BFS...")
     # bfs_path = play_instance.bfs()
     # if bfs_path:
@@ -58,15 +59,15 @@ def run_game(level_name, mattrix):
     #     for move in bfs_path:
     #         play_instance.h_move(move)
     #         plt.pause(1.5) 
-
-    # time.sleep(2)
+    #DFS
     # print("\nRunning DFS...")
     # dfs_path = play_instance.dfs()
     # if dfs_path:
     #     print("DFS Solution Path:", dfs_path)
     #     for move in dfs_path:
     #         play_instance.h_move(move)
-    #         plt.pause(1.5) 
+    #         plt.pause(1.5)
+    #  UCS
     # print("\nRunning UCS...")
     # ucs_path = play_instance.ucs()
     # if ucs_path:
@@ -74,8 +75,15 @@ def run_game(level_name, mattrix):
     #     for move in ucs_path:
     #         play_instance.h_move(move)
     #         plt.pause(1.5) 
+    print("Running A* Search...")
+    astar_path = play_instance.astar()
+    if astar_path:
+            print("Playing A* path...")
+            for move in astar_path:
+                play_instance.h_move(move)
+                plt.pause(1.5)
     
-
+    
     plt.ioff()  
     plt.close()
 
@@ -84,5 +92,5 @@ if __name__ == "__main__":
     levels = get_levels()
     for level_name, mattrix in levels.items():
         run_game(level_name, mattrix)
-        time.sleep(3) 
+        time.sleep(3) # للتأخير بين كل مستوى و المستوى يلي بعدو
         plt.close()

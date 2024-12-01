@@ -1,0 +1,410 @@
+import copy
+import matplotlib.pyplot as plt
+from collections import deque
+
+class State:
+    def __init__(self, mattrix):
+        if mattrix is None:
+            print("The matrix cannot be None")
+        self.mattrix = mattrix
+        self.goal_cells = [['red' if cell == 'M' else 'aqua' if cell == 'A' else 'orange' if cell == 'L' else None for cell in row] for row in mattrix]
+
+    def print(self, mattrix, ax):
+        rows_len = len(mattrix)
+        colums_len = len(mattrix[0])
+        ax.clear()
+
+        for i in range(rows_len):
+            for j in range(colums_len):
+                if mattrix[i][j] == 1:
+                    color = 'black'
+                elif mattrix[i][j] == 'R':
+                    color = 'red'
+                elif mattrix[i][j] == 'B':
+                    color = 'aqua'
+                elif mattrix[i][j] == 'O':
+                    color = 'orange'
+                else:
+                    color = 'white'
+
+                draw = plt.Rectangle((j, i), 1.5, 1.5, color=color)
+                ax.add_patch(draw)
+
+                border_c = self.goal_cells[i][j]
+                if border_c is not None:
+                    border_draw = plt.Rectangle((j, i), 0.7, 0.7, edgecolor=border_c, facecolor='none', linewidth=2)
+                    ax.add_patch(border_draw)
+
+        ax.set_xlim([0, colums_len])
+        ax.set_ylim([0, rows_len])
+        plt.draw()
+
+    def move1(self, state_obj, dir):
+        mattrix_copy = copy.deepcopy(state_obj.mattrix)
+        positions = self.get_loc(mattrix_copy)
+        for (i, j) in positions:
+            new_i, new_j = self.move2(mattrix_copy, i, j, dir)
+            if (new_i, new_j) != (i, j):
+                self.update_mattrix(mattrix_copy, i, j, new_i, new_j)
+        
+        return State(mattrix_copy)
+
+    def get_loc(self, mattrix):
+        return [(i, j) for i in range(len(mattrix)) for j in range(len(mattrix[0])) if mattrix[i][j] in ['R', 'B', 'O']]
+
+    def move2(self, mattrix, i, j, dir):
+        new_i, new_j = i, j
+        while self.able_to_move(mattrix, new_i, new_j, dir):
+            new_i, new_j = self.new_position(new_i, new_j, dir)
+            self.check(mattrix, i, j, new_j, new_i)
+        return new_i, new_j
+
+    def new_position(self, i, j, dir):
+        if dir == 'right':
+            j += 1
+        elif dir == 'left':
+            j -= 1
+        elif dir == 'up':
+            i += 1
+        elif dir == 'down':
+            i -= 1
+        return i, j
+
+    def update_mattrix(self, mattrix, old_i, old_j, new_i, new_j):
+        if (new_i, new_j) != (old_i, old_j):
+            mattrix[new_i][new_j] = mattrix[old_i][old_j]
+            mattrix[old_i][old_j] = 0
+
+    def able_to_move(self, mattrix, i, j, dir):
+        if (self.move_to_right(mattrix, i, j, dir) or
+            self.move_to_left(mattrix, i, j, dir) or
+            self.move_to_up(mattrix, i, j, dir) or
+            self.move_to_down(mattrix, i, j, dir)):
+            return True
+        return False
+
+    def move_to_right(self, mattrix, i, j, dir):
+        if dir == 'right':
+            if j + 1 < len(mattrix[0]) and mattrix[i][j + 1] not in [1, 'R', 'B', 'O']:
+                return True
+        return False
+
+    def move_to_left(self, mattrix, i, j, dir):
+        if dir == 'left':
+            if j - 1 >= 0 and mattrix[i][j - 1] not in [1, 'R', 'B', 'O']:
+                return True
+        return False
+
+    def move_to_up(self, mattrix, i, j, dir):
+        if dir == 'up':
+            if i + 1 < len(mattrix) and mattrix[i + 1][j] not in [1, 'R', 'B', 'O']:
+                return True
+        return False
+
+    def move_to_down(self, mattrix, i, j, dir):
+        if dir == 'down':
+            if i - 1 >= 0 and mattrix[i - 1][j] not in [1, 'R', 'B', 'O']:
+                return True
+        return False
+
+    def check(self, mattrix, i, j, new_j, new_i):
+        goals = {
+            'R': 'M',
+            'B': 'A',
+            'O': 'L'
+        }
+
+        if 0 <= new_i < len(mattrix) and 0 <= new_j < len(mattrix[0]):
+            square = mattrix[i][j]
+            target = self.mattrix[new_i][new_j]
+            if square in goals and target == goals[square]:
+                mattrix[new_i][new_j] = 0
+                self.goal_cells[new_i][new_j] = None
+                self.change_color(mattrix, i, j)
+        if self.check_win(mattrix):
+            print("You Win :)")
+
+    def change_color(self, mattrix, i, j):
+        if mattrix[i][j] in ['R', 'B', 'O']:
+            mattrix[i][j] = 'white'
+
+    def check_win(self, mattrix):
+        goals_reached = {
+            'R': 'M',
+            'B': 'A',
+            'O': 'L'}
+
+        for i in range(len(mattrix)):
+            for j in range(len(mattrix[0])):
+                cell = mattrix[i][j]
+                if cell in goals_reached and mattrix[i][j] != 'white':
+                    return False
+        return True
+
+    @staticmethod
+    def from_key(state_key):
+        mattrix = eval(state_key)
+        return State(mattrix)
+######################################Class Play###############################################
+#الهدف من الكلاس تحقيق منطق اللعبة و تحريك المربعات يدويا او باستخدام خوارزميات البحث الذكية (مثل BFS، DFS، وUCS)مع تحديث الرقعة بعد كل حركة و عرضها ضمن الواجهة بغض النظر اذا كانت الحركة يدوية او عن طريق خوارزميات البحث السابقة
+import matplotlib.pyplot as plt
+from collections import deque
+from state import State
+import queue
+class Play:
+    def __init__(self, state_ins):
+        self.state_ins = state_ins
+        self.fig, self.ax = plt.subplots(1, 1, figsize=(10, 6))
+        self.state_ins.print(self.state_ins.mattrix, self.ax)
+
+    def press(self, event):
+        self.next_state()
+
+    def next_state(self):
+        dir = ['right', 'left', 'up', 'down']
+        s_obj = []
+        for  dir in enumerate(dir, start=1):
+            n_state = self.state_ins.move1(self.state_ins, dir)
+            s_obj.append(n_state)
+            n_state.print(n_state.mattrix, self.ax)
+        plt.draw()
+
+    def h_move(self, dir, is_bfs=True):
+        self.pre_mattrix = [row[:] for row in self.state_ins.mattrix]
+        n_state_ins = self.state_ins.move1(self.state_ins, dir)
+        self.state_ins = n_state_ins
+        if is_bfs:
+            self.state_ins.print(self.state_ins.mattrix, self.ax)
+
+        plt.draw()
+
+    def bfs(self):
+        first_state = self.state_ins    #عرفت الحالة الابتدائية
+        queue = deque([(first_state, [])])  #عرفت queue و حطيت بقلبا الحالة الابتدائية و المسار فاضي
+        visited_st = set()   # عرفت state للحالات يلي زرتا
+        while queue:
+            this_state, this_path = queue.popleft()
+            state_key = str(this_state.mattrix)  
+            if state_key in visited_st:
+                continue
+            visited_st.add(state_key) 
+            if this_state.check_win(this_state.mattrix):
+                print("Path found by BFS:", this_path)
+                return this_path
+            for direction in ['up', 'down', 'left', 'right']:
+                next_state = this_state.move1(this_state, direction)
+                next_state_key = str(next_state.mattrix) #حولتا لمحارف
+                
+                if next_state_key not in visited_st:
+                    queue.append((next_state, this_path + [direction]))
+
+        print("No Path found by BFS.")
+        return None
+
+    # def dfs(self):  # شغالة بس علقتا لانو كتبتا بشكل recursive
+    #     first_state = self.state_ins
+    #     stack = [(first_state, [])]
+    #     visited_st = set()
+
+    #     while stack:
+    #         this_state, this_path = stack.pop() 
+    #         state_key = str(this_state.mattrix)
+            
+    #         if state_key in visited_st:
+    #             continue
+            
+    #         visited_st.add(state_key)
+            
+    #         if this_state.check_win(this_state.mattrix):
+    #             print("Path found by DFS:", this_path)
+    #             return this_path
+            
+    #         for direction in ['up', 'down', 'left', 'right']:
+    #             next_state = this_state.move1(this_state, direction)
+    #             next_state_key = str(next_state.mattrix)
+                
+    #             if next_state_key not in visited_st:
+    #                 stack.append((next_state, this_path + [direction]))
+    #                 plt.draw()
+
+    #     print("No Path found by DFS.")
+    #     return None
+
+    def recursive_dfs(self, this_state=None, this_path=None, visited_st=None):
+        if this_state is None:
+            this_state = self.state_ins
+            this_path = []
+            visited_st = set()
+        state_key = str(this_state.mattrix)
+        if state_key in visited_st:
+            return None
+        visited_st.add(state_key)
+        if this_state.check_win(this_state.mattrix):
+            print("Path found by Recursive DFS:", this_path)
+            return this_path
+        for direction in ['up', 'down', 'left', 'right']:
+            next_state = this_state.move1(this_state, direction)
+            next_state_key = str(next_state.mattrix)
+            if next_state_key not in visited_st:
+                result = self.recursive_dfs(next_state, this_path + [direction], visited_st)
+                if result: 
+                    return result
+                return None
+
+    def ucs(self):
+        first_state = self.state_ins
+        pq = queue.PriorityQueue() 
+        pq.put((0, str(first_state.mattrix), [])) 
+        visited_st = set()  
+        while not pq.empty():
+            current_cost, state_key, this_path = pq.get()  
+            if state_key in visited_st:
+                continue
+            visited_st.add(state_key)
+            this_state = State.from_key(state_key)
+            if this_state.check_win(this_state.mattrix):
+                print("Path found by UCS:", this_path)
+                return this_path
+            for direction in ['up', 'down', 'left', 'right']:
+                next_state = this_state.move1(this_state, direction)
+                next_state_key = str(next_state.mattrix)
+                movement_cost = 1  
+                new_cost = current_cost + movement_cost
+                if next_state_key not in visited_st:
+                    pq.put((new_cost, next_state_key, this_path + [direction]))
+        print("No Path found by UCS.")
+        return None
+
+    #لحتى شغل ال DFS ببدل بالكومنتات
+    def Bfs_Dfs_ucs_gor(self):# بشيل الكومنت و بشغل الخوارزمية يلي بدي ياها
+    # BFS
+        # bfs_path = self.bfs()
+        # if bfs_path:
+        #     print("Playing BFS path...")
+        #     for move in bfs_path:
+        #         self.h_move(move)
+        #         plt.pause(1.5)
+            
+        # plt.pause(1) 
+    
+    # DFS
+        # dfs_path = self.dfs()
+        # if dfs_path:
+        #     print("Playing DFS path...")
+        #     for move in dfs_path:
+        #         self.h_move(move)
+        #         plt.pause(1.5)
+        #     dfs_path = self.dfs()
+        #     if dfs_path:
+        #         print("Playing DFS path...")
+        #         for move in dfs_path:
+        #             self.h_move(move, is_bfs=False) 
+        #             plt.pause(1.5)
+    #UCS
+        ucs_path = self.ucs()
+        if ucs_path:
+                print("Playing UCS path...")
+                for move in ucs_path:
+                    self.h_move(move)
+                    plt.pause(1.5)
+        plt.pause(1)
+        recursive_dfs_path = self.recursive_dfs()
+        if recursive_dfs_path:
+                print("Playing recursive dfs path...")
+                for move in recursive_dfs_path:
+                    self.h_move(move)
+                    plt.pause(1.5)
+        plt.pause(1)
+
+def equalll(mattrix1, mattrix2):
+    return mattrix1 == mattrix2
+
+#############################################Main######################################################
+# يقوم بادارة الكلاسات الاخرى و تشغيلها من خلال عرض مستويات مختلفة و تطبيق الخوارزميات عليها
+from state import State
+from play import Play
+import matplotlib.pyplot as plt
+import time
+def get_levels():
+    levels = {
+        "Easy": [
+            [0, 0, 0, 1, 1, 1, 0, 0],
+            [1, 1, 1, 1, 'M', 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 'R', 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+        ],
+        "Medium": [
+            [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+            [1, 1, 'R', 0, 0, 1, 1, 1, 1, 1, 0],
+            [1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+            [1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1],
+            [1, 0, 0, 'M', 0, 0, 0, 'B', 'A', 1, 1],
+            [1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        ],
+        "hard": [
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 0, 'L', 1, 'M', 1],
+            [1, 0, 1, 1, 1, 1, 0, 1],
+            [1, 0, 'O', 'R', 'B', 0, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0, 1],
+            [0, 1, 0, 0, 0, 1, 0, 1],
+            [0, 1, 0, 'A', 0, 0, 0, 1],
+            [0, 1, 1, 1, 1, 1, 1, 1],
+        ],
+    }
+    return levels
+
+def run_game(level_name, mattrix):
+    print(f"Running level: {level_name}")
+    state_ins = State(mattrix)
+    play_instance = Play(state_ins)
+    
+    
+    plt.ion() #لتشغيل ال DFS لازم بدل بالكومنتات
+    #Recursive_Dfs
+    # print("\nRunning recursive dfs...")
+    # recursive_dfs_path = play_instance.recursive_dfs()
+    # if recursive_dfs_path:
+    #     print("recursive dfs path Solution Path:", recursive_dfs_path)
+    #     for move in recursive_dfs_path:
+    #         play_instance.h_move(move)
+    #         plt.pause(1.5) # لزيادة الزمن بين الحركات
+    #BFS
+    # print("\nRunning BFS...")
+    # bfs_path = play_instance.bfs()
+    # if bfs_path:
+    #     print("BFS Solution Path:", bfs_path)
+    #     for move in bfs_path:
+    #         play_instance.h_move(move)
+    #         plt.pause(1.5) 
+    #DFS
+    # print("\nRunning DFS...")
+    # dfs_path = play_instance.dfs()
+    # if dfs_path:
+    #     print("DFS Solution Path:", dfs_path)
+    #     for move in dfs_path:
+    #         play_instance.h_move(move)
+    #         plt.pause(1.5)
+    #  UCS
+    print("\nRunning UCS...")
+    ucs_path = play_instance.ucs()
+    if ucs_path:
+        print("UCS Solution Path:", ucs_path)
+        for move in ucs_path:
+            play_instance.h_move(move)
+            plt.pause(1.5) 
+    plt.ioff()  
+    plt.close()
+
+
+if __name__ == "__main__":
+    levels = get_levels()
+    for level_name, mattrix in levels.items():
+        run_game(level_name, mattrix)
+        time.sleep(3) # للتأخير بين كل مستوى و المستوى يلي بعدو
+        plt.close()

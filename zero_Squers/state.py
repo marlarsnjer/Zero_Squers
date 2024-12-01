@@ -1,8 +1,8 @@
+##################################State######################################
+#الهدف من الكلاس هو رسم الرقعة و التحقق من قواعد اللعبة (الحركات و الاهداف و التأكد من الخسارة و الفوز ) و عرضها ضمن واجهة
 import copy
 import matplotlib.pyplot as plt
 from collections import deque
-import heapq
-import time
 
 class State:
     def __init__(self, mattrix):
@@ -147,33 +147,3 @@ class State:
     def from_key(state_key):
         mattrix = eval(state_key)
         return State(mattrix)
-
-
-class Play:
-    def __init__(self, state_ins):
-        self.state_ins = state_ins
-        self.fig, self.ax = plt.subplots(1, 1, figsize=(10, 6))
-        self.state_ins.print(self.state_ins.mattrix, self.ax)
-        self.ax.set_title("BFS Search")
-        plt.tight_layout()
-
-    def press(self, event):
-        self.next_state()
-
-    def next_state(self):
-        directions = ['right', 'left', 'up', 'down']
-        s_obj = []
-        for direction in directions:
-            n_state = self.state_ins.move1(self.state_ins, direction)
-            s_obj.append(n_state)
-            n_state.print(n_state.mattrix, self.ax)
-        plt.draw()
-
-    def h_move(self, dir, is_bfs=True):
-        self.pre_mattrix = [row[:] for row in self.state_ins.mattrix]
-        n_state_ins = self.state_ins.move1(self.state_ins, dir)
-        self.state_ins = n_state_ins
-        if is_bfs:
-            self.state_ins.print(self.state_ins.mattrix, self.ax)
-        plt.draw()
-
