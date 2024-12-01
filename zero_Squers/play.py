@@ -135,61 +135,61 @@ class Play:
 
     def heu1(self, B_matrix):
         goals = []  
-        movers = []
+        squer = []
         for i, row in enumerate(B_matrix):
             for j, value in enumerate(row):
                 if value == 'M' or value == 'A' or value == 'L':
                     goals.append((i, j))
                 elif value == 'R' or value == 'B' or value == 'O':
-                    movers.append((i, j))
+                    squer.append((i, j))
+
         total_distance = 0
-        for i in range(len(movers)):
-            mx, my = movers[i]
+        for i in range(len(squer)):
+            sx, sy = squer[i]
             if i == 0:
                 target_type = 'M'
             elif i == 1:
                 target_type = 'A'
             else:
                 target_type = 'L'
-            min_distance = float('inf')
-            for tx, ty in goals:  
-                dist = abs(mx - tx) + abs(my - ty) 
-                min_distance = min(min_distance, dist)
-            
-            total_distance += min_distance
+            for gx, gy in goals:  
+                dist = abs(sx - gx) + abs(sy - gy) 
+                total_distance += dist  
 
         return total_distance
 
 
+
     def astar(self):
         initial_state = self.state_ins
-        pq = PriorityQueue()
-        pq.put((0, id(initial_state), initial_state, []))
-        visited = set()
+        pq = PriorityQueue()  
+        pq.put((0, str(initial_state.mattrix), [])) 
+        visited_states = set() 
+        visited_counter=0
         while not pq.empty():
-            cost, _, current_state, path = pq.get() 
-            current_key = tuple(map(tuple, current_state.mattrix))
-
-            if current_key in visited:
+            current_cost, state_key, current_path = pq.get()
+            if state_key in visited_states:
                 continue
-            visited.add(current_key)
-
+            visited_states.add(state_key)
+            visited_counter+=1
+            current_state = State.from_key(state_key) 
             if current_state.check_win(current_state.mattrix):
-                print("Solution found with A*: Path:", path)
-                return path
+                print("Path found by UCS:", current_path)
+                print("Cost:",new_cost )
+                print("Visited Counter:",visited_counter )
+                return current_path
 
-            directions = ['up', 'down', 'left', 'right']
-            for direction in directions:
-                new_state = current_state.move1(current_state, direction)
-                new_key = tuple(map(tuple, new_state.mattrix))
+            for direction in ['up', 'down', 'left', 'right']:
+                next_state = current_state.move1(current_state, direction) 
+                next_state_key = str(next_state.mattrix) 
+                movement_cost = 1
+                new_cost = current_cost + movement_cost
+                h_cost = self.heu1(next_state.mattrix) 
+                f_cost = new_cost + h_cost  
+                if next_state_key not in visited_states: 
+                    pq.put((f_cost, next_state_key, current_path + [direction])) 
 
-                if new_key not in visited:
-                    g_cost = len(path) + 1 
-                    h_cost = self.heu1(new_state.mattrix) 
-                    f_cost = g_cost + h_cost  
-                    pq.put((f_cost, id(new_state), new_state, path + [direction])) 
-
-        print("No solution found with A*.")
+        print("No Path found by UCS.") 
         return None
 
 
